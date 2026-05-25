@@ -1,14 +1,24 @@
 import { z } from 'zod'
 
-export const tripFormSchema = z.object({
-  title: z.string().min(1).max(100),
-  destination: z.string().min(1).max(200),
-  startDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
-  endDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
-  budget: z.number().positive(),
-  currency: z.string().length(3),
-  travelers: z.number().int().positive().max(50),
-  packageType: z.enum(['budget', 'standard', 'premium', 'luxury']),
+export const TripFormSchema = z.object({
+  destino: z.string().min(2, 'Destino requerido'),
+  destinoSorpresa: z.boolean().default(false),
+  origen: z.string().min(2, 'Ciudad de origen requerida'),
+  personas: z.number().min(1).max(20),
+  fechaInicio: z.string().min(1),
+  fechaFin: z.string().min(1),
+  presupuesto: z.number().min(100),
+  moneda: z.enum(['USD', 'EUR', 'DOP']).default('USD'),
+  tipo: z.enum([
+    'aventura',
+    'relax',
+    'cultura',
+    'familia',
+    'crucero',
+    'romantico',
+    'gastronomia',
+  ]),
+  preferencias: z.array(z.string()).optional(),
 })
 
-export type TripFormData = z.infer<typeof tripFormSchema>
+export type TripForm = z.infer<typeof TripFormSchema>

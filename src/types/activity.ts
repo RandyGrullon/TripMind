@@ -1,36 +1,33 @@
+export type ActivityType =
+  | 'museo'
+  | 'restaurante'
+  | 'templo'
+  | 'parque'
+  | 'barrio'
+  | 'playa'
+  | 'actividad'
+  | 'traslado'
+
 export interface Activity {
   id: string
-  tripId: string
-  dayIndex: number
-  title: string
-  description: string
-  location: {
-    name: string
-    lat: number
-    lng: number
-    address?: string
-  }
-  startTime: string
-  endTime: string
-  category: ActivityCategory
-  cost: number
-  currency: string
-  bookingUrl?: string
-  affiliateUrl?: string
-  notes?: string
-}
-
-export type ActivityCategory =
-  | 'transport'
-  | 'accommodation'
-  | 'food'
-  | 'sightseeing'
-  | 'activity'
-  | 'shopping'
-  | 'other'
-
-export interface DayItinerary {
-  dayIndex: number
-  date: string
-  activities: Activity[]
+  nombre: string
+  descripcion: string
+  horaInicio: string
+  horaFin: string
+  duracionMinutos: number
+  tipo: ActivityType
+  direccion: string
+  lat: number
+  lng: number
+  radioGeofencingMetros: number
+  precioEstimado: number
+  reservaRequerida: boolean
+  reservaPagada: boolean
+  mejorHoraVisita: string
+  consejos: string[]
+  linkAfiliado?: string
+  tiempoHastaSiguiente: number
+  estado: 'pendiente' | 'en_curso' | 'completada' | 'perdida' | 'recuperada'
+  esPerdida: boolean
+  reagendadaDesdeDia?: number
 }

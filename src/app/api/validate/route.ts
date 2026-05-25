@@ -1,17 +1,17 @@
 import { NextResponse } from 'next/server'
 import { validateSchedule } from '@/lib/ai/validateSchedule'
-import type { DayItinerary } from '@/types/activity'
+import type { Day } from '@/types/trip'
 
 export async function POST(request: Request): Promise<NextResponse> {
-  const body = (await request.json()) as { itinerary: DayItinerary[] }
+  const body = (await request.json()) as { dias: Day[] }
 
-  if (!Array.isArray(body.itinerary)) {
+  if (!Array.isArray(body.dias)) {
     return NextResponse.json(
-      { error: 'itinerary must be an array' },
+      { error: 'dias must be an array' },
       { status: 400 }
     )
   }
 
-  const result = await validateSchedule(body.itinerary)
+  const result = await validateSchedule(body.dias)
   return NextResponse.json(result)
 }

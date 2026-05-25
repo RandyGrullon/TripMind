@@ -1,10 +1,9 @@
-import type { DayItinerary } from '@/types/activity'
+import type { Day } from '@/types/trip'
 import { Card } from '@/components/ui/Card'
-import { formatDate } from '@/lib/utils/dateHelpers'
 import { ActivityItem } from './ActivityItem'
 
 interface ItineraryCardProps {
-  day: DayItinerary
+  day: Day
 }
 
 export function ItineraryCard({ day }: ItineraryCardProps) {
@@ -12,12 +11,12 @@ export function ItineraryCard({ day }: ItineraryCardProps) {
     <Card variant="bordered">
       <div className="mb-4 flex items-center justify-between">
         <h3 className="text-lg font-semibold text-gray-900">
-          Day {day.dayIndex + 1}
+          Día {day.numero}: {day.titulo}
         </h3>
-        <span className="text-sm text-gray-500">{formatDate(day.date)}</span>
+        <span className="text-sm text-gray-500">{day.ciudad}</span>
       </div>
       <div className="flex flex-col gap-3">
-        {day.activities.map((activity) => (
+        {day.actividades.map((activity) => (
           <ActivityItem key={activity.id} activity={activity} />
         ))}
       </div>

@@ -1,20 +1,20 @@
-import type { DayItinerary } from '@/types/activity'
+import type { Day } from '@/types/trip'
 import { formatCurrency } from '@/lib/utils/formatters'
 
 interface BudgetDisplayProps {
-  itinerary: DayItinerary[]
+  dias: Day[]
   currency?: string
   totalBudget: number
 }
 
 export function BudgetDisplay({
-  itinerary,
+  dias,
   currency = 'USD',
   totalBudget,
 }: BudgetDisplayProps) {
-  const spent = itinerary
-    .flatMap((d) => d.activities)
-    .reduce((sum, a) => sum + a.cost, 0)
+  const spent = dias
+    .flatMap((d) => d.actividades)
+    .reduce((sum, a) => sum + a.precioEstimado, 0)
 
   const remaining = totalBudget - spent
   const percentage = Math.min((spent / totalBudget) * 100, 100)
@@ -22,8 +22,8 @@ export function BudgetDisplay({
   return (
     <div className="rounded-xl bg-white p-4 shadow-sm">
       <div className="flex justify-between text-sm text-gray-600 mb-2">
-        <span>Spent: {formatCurrency(spent, currency)}</span>
-        <span>Budget: {formatCurrency(totalBudget, currency)}</span>
+        <span>Gastado: {formatCurrency(spent, currency)}</span>
+        <span>Presupuesto: {formatCurrency(totalBudget, currency)}</span>
       </div>
       <div className="h-2 w-full rounded-full bg-gray-200">
         <div
@@ -35,8 +35,8 @@ export function BudgetDisplay({
         className={`mt-2 text-sm font-medium ${remaining < 0 ? 'text-red-600' : 'text-green-600'}`}
       >
         {remaining >= 0
-          ? `${formatCurrency(remaining, currency)} remaining`
-          : `${formatCurrency(-remaining, currency)} over budget`}
+          ? `${formatCurrency(remaining, currency)} restante`
+          : `${formatCurrency(-remaining, currency)} sobre presupuesto`}
       </p>
     </div>
   )

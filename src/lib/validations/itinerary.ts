@@ -1,32 +1,43 @@
 import { z } from 'zod'
 
-export const locationSchema = z.object({
-  name: z.string().min(1),
-  lat: z.number().min(-90).max(90),
-  lng: z.number().min(-180).max(180),
-  address: z.string().optional(),
-})
-
 export const activitySchema = z.object({
   id: z.string(),
-  tripId: z.string(),
-  dayIndex: z.number().int().nonnegative(),
-  title: z.string().min(1),
-  description: z.string(),
-  location: locationSchema,
-  startTime: z.string(),
-  endTime: z.string(),
-  category: z.enum([
-    'transport',
-    'accommodation',
-    'food',
-    'sightseeing',
-    'activity',
-    'shopping',
-    'other',
+  nombre: z.string().min(1),
+  descripcion: z.string(),
+  horaInicio: z.string(),
+  horaFin: z.string(),
+  duracionMinutos: z.number().nonnegative(),
+  tipo: z.enum([
+    'museo',
+    'restaurante',
+    'templo',
+    'parque',
+    'barrio',
+    'playa',
+    'actividad',
+    'traslado',
   ]),
-  cost: z.number().nonnegative(),
-  currency: z.string().length(3),
+  direccion: z.string(),
+  lat: z.number().min(-90).max(90),
+  lng: z.number().min(-180).max(180),
+  radioGeofencingMetros: z.number().positive(),
+  precioEstimado: z.number().nonnegative(),
+  reservaRequerida: z.boolean(),
+  mejorHoraVisita: z.string(),
+  consejos: z.array(z.string()),
+  linkAfiliado: z.string().optional(),
+  tiempoHastaSiguiente: z.number().nonnegative(),
+})
+
+export const daySchema = z.object({
+  numero: z.number().int().positive(),
+  titulo: z.string().min(1),
+  descripcion: z.string(),
+  ciudad: z.string().min(1),
+  actividades: z.array(activitySchema),
+  presupuestoDia: z.number().nonnegative(),
+  colorMapa: z.string(),
 })
 
 export type ValidatedActivity = z.infer<typeof activitySchema>
+export type ValidatedDay = z.infer<typeof daySchema>

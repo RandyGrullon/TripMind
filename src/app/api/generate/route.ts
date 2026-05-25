@@ -1,15 +1,92 @@
-import { NextResponse } from 'next/server'
-import { generateItinerary } from '@/lib/ai/generateItinerary'
-import { tripFormSchema } from '@/lib/validations/tripForm'
+import Anthropic from '@anthropic-ai/sdk'
+import { TripFormSchema } from '@/lib/validations/tripForm'
+import type { TripForm } from '@/lib/validations/tripForm'
+import { buildItineraryPrompt } from '@/lib/ai/generateItinerary'
+import { searchFlights } from '@/lib/api/amadeus'
+import { searchHotels } from '@/lib/api/booking'
+import { searchActivities } from '@/lib/api/viator'
 
-export async function POST(request: Request): Promise<NextResponse> {
+const anthropic = new Anthropic()
+
+async function buscarVuelos(form: TripForm): Promise<unknown> {
+  try {
+    return await searchFlights(
+      form.origen,
+      form.destino,
+      form.fechaInicio,
+      form.personas
+    )
+  } catch {
+    return null
+  }
+}
+
+async function buscarHoteles(form: TripForm): Promise<unknown> {
+  try {
+    return await searchHotels(
+      form.destino,
+      form.fechaInicio,
+      form.fechaFin,
+      form.personas
+    )
+  } catch {
+    return null
+  }
+}
+
+async function buscarActividades(form: TripForm): Promise<unknown> {
+  try {
+    return await searchActivities(form.destino, form.fechaInicio)
+  } catch {
+    return null
+  }
+}
+
+export async function POST(request: Request): Promise<Response> {
   const body: unknown = await request.json()
-  const parsed = tripFormSchema.safeParse(body)
+  const parsed = TripFormSchema.safeParse(body)
 
   if (!parsed.success) {
-    return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 })
+    return new Response(JSON.stringify({ error: parsed.error.flatten() }), {
+      status: 400,
+      headers: { 'Content-Type': 'application/json' },
+    })
   }
 
-  const itinerary = await generateItinerary(parsed.data)
-  return NextResponse.json({ itinerary })
+  const form = parsed.data
+
+  await Promise.all([
+    buscarVuelos(form),
+    buscarHoteles(form),
+    buscarActividades(form),
+    Promise.resolve(null),
+  ])
+
+  const stream = anthropic.messages.stream({
+    model: 'claude-sonnet-4-6',
+    max_tokens: 8000,
+    messages: [{ role: 'user', content: buildItineraryPrompt(form) }],
+  })
+
+  const encoder = new TextEncoder()
+  const readable = new ReadableStream<Uint8Array>({
+    async start(controller) {
+      try {
+        for await (const event of stream) {
+          if (
+            event.type === 'content_block_delta' &&
+            event.delta.type === 'text_delta'
+          ) {
+            controller.enqueue(encoder.encode(event.delta.text))
+          }
+        }
+      } finally {
+        controller.close()
+      }
+    },
+  })
+
+  return new Response(readable, {
+    headers: { 'Content-Type': 'text/plain; charset=utf-8' },
+  })
 }

@@ -15,7 +15,7 @@ export async function generateAlertMessage(
     messages: [
       {
         role: 'user',
-        content: `Generate a friendly alert message (level ${level}/5) for a traveler who is ${distanceMeters}m from "${activity.title}" at ${activity.location.name}. Keep it under 2 sentences.`,
+        content: `Generate a friendly alert message (level ${level}/5) for a traveler who is ${distanceMeters}m from "${activity.nombre}" at ${activity.direccion}. Keep it under 2 sentences.`,
       },
     ],
   })
