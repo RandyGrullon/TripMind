@@ -2,11 +2,13 @@
 
 import { useState, useEffect } from 'react'
 import Image from 'next/image'
+import { useRouter } from 'next/navigation'
 import { TripForm } from '@/components/trip/TripForm'
 import { TripMap } from '@/components/map/TripMap'
 import { PackageCompare } from '@/components/trip/PackageCompare'
 import { BudgetDisplay } from '@/components/trip/BudgetDisplay'
 import { ActivityItem } from '@/components/trip/ActivityItem'
+import { useUser } from '@/hooks/useUser'
 import type { TripForm as TripFormType } from '@/lib/validations/tripForm'
 import type { Trip } from '@/types/trip'
 import type { WeatherData } from '@/lib/api/openweather'
@@ -43,6 +45,8 @@ const LOADING_STEPS = [
 type AppStep = 'landing' | 'form' | 'loading' | 'packages' | 'result'
 
 export default function HomePage() {
+  const router = useRouter()
+  const { user } = useUser()
   const [step, setStep] = useState<AppStep>('landing')
   const [loadingStep, setLoadingStep] = useState(0)
   const [allPackages, setAllPackages] = useState<GenerateResult | null>(null)
@@ -53,6 +57,7 @@ export default function HomePage() {
   const [weather, setWeather] = useState<WeatherData | null>(null)
   const [formData, setFormData] = useState<TripFormType | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [saving, setSaving] = useState(false)
 
   useEffect(() => {
     if (step !== 'loading') return
@@ -99,6 +104,29 @@ export default function HomePage() {
     setSelectedPackage(paquete)
     setItinerary(allPackages[paquete])
     setStep('result')
+  }
+
+  const handleSaveTrip = async () => {
+    if (!itinerary) return
+    if (!user) {
+      router.push('/login?redirect=/')
+      return
+    }
+    setSaving(true)
+    try {
+      const res = await fetch('/api/trips', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ trip: itinerary }),
+      })
+      if (!res.ok) throw new Error('Error guardando viaje')
+      const { trip: saved } = (await res.json()) as { trip: { id: string } }
+      router.push(`/trip/${saved.id}`)
+    } catch {
+      // Non-fatal — stay on result page
+    } finally {
+      setSaving(false)
+    }
   }
 
   // ── Loading ───────────────────────────────────────────────────────────────
@@ -174,7 +202,18 @@ export default function HomePage() {
                 </p>
               ) : null}
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
+              <button
+                onClick={handleSaveTrip}
+                disabled={saving}
+                className="rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-blue-700 disabled:opacity-60"
+              >
+                {saving
+                  ? 'Guardando...'
+                  : user
+                    ? 'Guardar viaje'
+                    : 'Guardar (inicia sesión)'}
+              </button>
               <button
                 onClick={() => setStep('packages')}
                 className="text-sm text-blue-600 hover:underline"

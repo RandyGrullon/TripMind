@@ -7,6 +7,7 @@ interface Expense {
   amount: number
   currency: string
   paidBy: string
+  paidByName?: string
   splitAmong: string[]
 }
 
