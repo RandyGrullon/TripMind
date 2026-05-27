@@ -1,5 +1,6 @@
 import type { Trip } from './trip'
 import type { Activity } from './activity'
+import type { PlanId, PlanTier } from './subscription'
 
 export interface TripRow {
   id: string
@@ -52,5 +53,27 @@ export interface GroupExpenseRow {
   concepto: string
   monto: number
   entre_todos: boolean
+  created_at: string
+}
+
+export interface SubscriptionRow {
+  id: string
+  user_id: string
+  plan_id: PlanId
+  tier: PlanTier
+  stripe_customer_id: string | null
+  stripe_subscription_id: string | null
+  stripe_price_id: string | null
+  status: 'active' | 'canceled' | 'past_due' | 'trialing' | 'incomplete'
+  current_period_end: string | null
+  cancel_at_period_end: boolean
+  created_at: string
+}
+
+export interface ReferralRow {
+  id: string
+  user_id: string
+  code: string
+  conversions: number
   created_at: string
 }
